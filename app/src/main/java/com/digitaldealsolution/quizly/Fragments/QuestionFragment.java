@@ -1,13 +1,16 @@
+/*
+ * *
+ *  * Created by harsh on 03/06/22, 8:26 PM
+ *  * Copyright (c) 2022 . All rights reserved.
+ *  * Last modified 03/06/22, 8:26 PM
+ *
+ */
 package com.digitaldealsolution.quizly.Fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -16,13 +19,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+
 import com.airbnb.lottie.LottieAnimationView;
+import com.digitaldealsolution.quizly.Activities.MainActivity;
 import com.digitaldealsolution.quizly.Database.QuestionDatabase;
 import com.digitaldealsolution.quizly.Database.QuestionModel;
-import com.digitaldealsolution.quizly.Activities.MainActivity;
 import com.digitaldealsolution.quizly.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,27 +36,34 @@ import java.util.Random;
 
 
 public class QuestionFragment extends Fragment {
-    private Boolean timer;
-    private CountDownTimer countDownTimer;
-    private List<QuestionModel> questionModels;
-    private TextView question,counter,questionNo;
-    private CardView counterCard;
-    private int currentQuestion =0,score;
-    private ArrayList<Button> optionBtn;
-    private Button option1,option2,option3,option4;
     //Just Change this value whenever you want to change number of question
-    int totalQuestion =5;
+    int totalQuestion = 5;
+    // checks timer is selected or not
+    private Boolean timer;
+    // timer for 10 secs
+    private CountDownTimer countDownTimer;
+    // list of questions
+    private List<QuestionModel> questionModels;
+    private TextView question, counter, questionNo;
+    private CardView counterCard;
+    private int currentQuestion = 0, score;
+    // this store the list of button to make answer checking easy
+    private ArrayList<Button> optionBtn;
+    private Button option1, option2, option3, option4;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_question, container, false);
+
         timer = requireActivity().getIntent().getExtras().getBoolean("timer");
-        score =0;
+        score = 0;
+        //declaration
         questionModels = new ArrayList<>();
         questionNo = root.findViewById(R.id.qestion_No);
         counterCard = root.findViewById(R.id.counter_card);
@@ -61,35 +73,30 @@ public class QuestionFragment extends Fragment {
         option2 = root.findViewById(R.id.option2);
         option3 = root.findViewById(R.id.option3);
         option4 = root.findViewById(R.id.option4);
-        optionBtn = new ArrayList<>(Arrays.asList(option1,option2,option3,option4));
-        countDownTimer = new CountDownTimer(10000,1000) {
+        optionBtn = new ArrayList<>(Arrays.asList(option1, option2, option3, option4));
+        countDownTimer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if(millisUntilFinished/1000<5){
+                if (millisUntilFinished / 1000 < 5) {
                     counterCard.setCardBackgroundColor(Color.RED);
-                }
-                else{
+                } else {
                     counterCard.setCardBackgroundColor(Color.GREEN);
                 }
-                counter.setText(String.valueOf(millisUntilFinished/1000));
+                counter.setText(String.valueOf(millisUntilFinished / 1000));
 
             }
 
             @Override
             public void onFinish() {
-                if(currentQuestion<questionModels.size()-1)
-                { currentQuestion++;
-                    getNewQuestion();}
-                else{
+                if (currentQuestion < questionModels.size() - 1) {
+                    currentQuestion++;
+                    getNewQuestion();
+                } else {
                     endQuiz();
                 }
             }
         };
-
-
-
-
-
+        // click listener for options buttons
         option1.setOnClickListener(v -> checkAnswer(1));
         option2.setOnClickListener(v -> checkAnswer(2));
         option3.setOnClickListener(v -> checkAnswer(3));
@@ -99,15 +106,14 @@ public class QuestionFragment extends Fragment {
         return root;
     }
 
-
+    // function get data from db
     private List<QuestionModel> getData() {
         QuestionDatabase database = QuestionDatabase.getDbInstance(requireActivity().getApplicationContext());
 
         return getRandomElement(database.questionDOA().getAllQuestion());
     }
-
-    public List<QuestionModel> getRandomElement(List<QuestionModel> list)
-    {
+    // function to randomly select question
+    public List<QuestionModel> getRandomElement(List<QuestionModel> list) {
         Random rand = new Random();
 
 
@@ -124,6 +130,7 @@ public class QuestionFragment extends Fragment {
         return newList;
     }
 
+    //function to change question
     @SuppressLint("UseCompatLoadingForDrawables")
     private void getNewQuestion() {
         questionNo.setText("Question " + (currentQuestion + 1) + "/" + questionModels.size());
@@ -137,52 +144,53 @@ public class QuestionFragment extends Fragment {
         option2.setBackground(getResources().getDrawable(R.drawable.btn_bg));
         option3.setBackground(getResources().getDrawable(R.drawable.btn_bg));
         option4.setBackground(getResources().getDrawable(R.drawable.btn_bg));
-        if(timer){
+        if (timer) {
             setTimer();
-        }
-        else{
+        } else {
             counterCard.setVisibility(View.INVISIBLE);
             counter.setVisibility(View.INVISIBLE);
         }
     }
 
-
+    // funtion to restart timer
     public void setTimer() {
         countDownTimer.start();
     }
+
+    //function to check answer and perform task accordingly
     @SuppressLint("UseCompatLoadingForDrawables")
     private void checkAnswer(int x) {
         int correctAns = questionModels.get(currentQuestion).getAnswer();
-        if(x == correctAns){
-            optionBtn.get(x-1).setBackgroundColor(Color.GREEN);
+        if (x == correctAns) {
+            optionBtn.get(x - 1).setBackgroundColor(Color.GREEN);
             score++;
             Handler handler = new Handler();
             handler.postDelayed(() -> {
-                if(currentQuestion<questionModels.size()-1)
-                { currentQuestion++;
-                    getNewQuestion();}
-
-                else{
+                if (currentQuestion < questionModels.size() - 1) {
+                    currentQuestion++;
+                    getNewQuestion();
+                } else {
                     endQuiz();
                 }
-            },200);
-        }
-        else{
-            optionBtn.get(x-1).setBackgroundColor(Color.RED);
-            optionBtn.get(correctAns-1).setBackgroundColor(Color.GREEN);
+            }, 200);
+        } else {
+            optionBtn.get(x - 1).setBackgroundColor(Color.RED);
+            optionBtn.get(correctAns - 1).setBackgroundColor(Color.GREEN);
             Handler handler = new Handler();
             handler.postDelayed(() -> {
 
-                optionBtn.get(x-1).setBackground(getResources().getDrawable(R.drawable.btn_bg));
-                if(currentQuestion<questionModels.size()-1)
-                { currentQuestion++;
-                    getNewQuestion();}
-                else{
+                optionBtn.get(x - 1).setBackground(getResources().getDrawable(R.drawable.btn_bg));
+                if (currentQuestion < questionModels.size() - 1) {
+                    currentQuestion++;
+                    getNewQuestion();
+                } else {
                     endQuiz();
                 }
-            },200);
+            }, 200);
         }
     }
+
+    //this function end the quiz
     @SuppressLint("UseCompatLoadingForDrawables")
     private void endQuiz() {
         countDownTimer.cancel();
@@ -192,7 +200,7 @@ public class QuestionFragment extends Fragment {
         TextView result = bottomSheetView.findViewById(R.id.result);
         Button play_again = bottomSheetView.findViewById(R.id.play_again);
         Button exit = bottomSheetView.findViewById(R.id.exit);
-        LottieAnimationView pass =bottomSheetView.findViewById(R.id.pass);
+        LottieAnimationView pass = bottomSheetView.findViewById(R.id.pass);
         LottieAnimationView fail = bottomSheetView.findViewById(R.id.fail);
         play_again.setOnClickListener(v -> {
             questionModels = getData();
@@ -212,12 +220,11 @@ public class QuestionFragment extends Fragment {
             startActivity(intent);
             requireActivity().finish();
         });
-        score_txt.setText("Your score is "+ score + " out of " + questionModels.size());
-        if(((float)score/questionModels.size())*100>33.33){
+        score_txt.setText("Your score is " + score + " out of " + questionModels.size());
+        if (((float) score / questionModels.size()) * 100 > 33.33) {
             result.setText("PASS");
             pass.setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             fail.setVisibility(View.VISIBLE);
             result.setText("FAIL");
             result.setTextColor(Color.RED);

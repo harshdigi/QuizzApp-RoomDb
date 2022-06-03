@@ -1,3 +1,10 @@
+/*
+ * *
+ *  * Created by harsh on 03/06/22, 8:26 PM
+ *  * Copyright (c) 2022 . All rights reserved.
+ *  * Last modified 03/06/22, 8:26 PM
+ *
+ */
 package com.digitaldealsolution.quizly.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    // Dialog For Timer/NoTimer Selection
     private void callDialog() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.dialog);
